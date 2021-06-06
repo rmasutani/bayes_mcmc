@@ -1,0 +1,56 @@
+name: my_nlp
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          python-verion: ['3.9']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+      
+      - name: Add path for Poetry
+        run: echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+      
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      
+      # - name: Specify python version
+      #   run: poetry env use python3.9
+
+      - name: Install dependencies
+        run: poetry install 
+      
+      - name: black
+        run: poetry run black . --check
+      
+      - name: isort
+        run: poetry run isort . --check
+      
+      - name: autoflake
+        run: poetry run autoflake -r --check --remove-all-unused-imports --ignore-init-module-imports --remove-unused-variables .
+      
+      - name: mypy 
+        run: poetry run mypy . --platform linux --config-file mypy.ini 
+      
+      - name: Run tests
+        run: poetry run pytest
