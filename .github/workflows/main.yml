@@ -33,9 +33,6 @@ jobs:
       
       - name: Display Python version
         run: python -c "import sys; print(sys.version)"
-      
-      - name: Specify python version
-        run: poetry env use python3.8
 
       - name: Install dependencies
         run: poetry install 
